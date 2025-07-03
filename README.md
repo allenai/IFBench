@@ -1,6 +1,14 @@
 # Generalizing Verifiable Instruction Following
 
-This repo contains IFBench, which is a new, challenging benchmark for precise instruction following. 
+This repo contains IFBench, which is a new, challenging benchmark for precise instruction following.
+
+<p align="center"> <a href="https://github.com/allenai/IFBench/blob/main/Precise_IF_Generalization_Abilities.pdf"> Read the IFBench paper</a> </p>
+
+Top open-source and commercial models that score > 80% on IFEval fall to roughly 50% or lower on IFBench, exposing significant room for AI progress.
+![image](https://github.com/user-attachments/assets/80e77314-2ef6-4403-a49d-545759f49fbc)
+
+
+
 
 ## IFBench
 IFBench consists of two parts:
