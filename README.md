@@ -1,6 +1,7 @@
 # Generalizing Verifiable Instruction Following
 
-This repo contains IFBench, which is a new, challenging benchmark for precise instruction following. 
+This repo contains IFBench, which is a new, challenging benchmark for precise instruction following.
+<p align="center"> <a href="https://arxiv.org/pdf/2507.02833"> Read the IFBench paper, accepted to NeurIPS 2025, D&B.</a> </p>
 
 ## IFBench
 IFBench consists of two parts:
@@ -47,7 +48,7 @@ If you used this repository or our models, please cite our work:
    title={Generalizing Verifiable Instruction Following}, 
    author={Valentina Pyatkin and Saumya Malik and Victoria Graf and Hamish Ivison and Shengyi Huang and Pradeep Dasigi and Nathan Lambert and Hannaneh Hajishirzi},
    year={2025},
-   eprint={TODO},
-   archivePrefix={arXiv},
-   primaryClass={cs.CL}
+  journal={Advances in Neural Information Processing Systems},
+  volume={38},
+  year={2025}
 }
