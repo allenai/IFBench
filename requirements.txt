@@ -5,4 +5,4 @@ immutabledict
 spacy
 emoji
 syllapy
-unicodedata
+unicodedata2
