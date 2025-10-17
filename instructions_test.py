@@ -1098,5 +1098,12 @@ Zimbabwe"""
         with self.subTest('test with TEST_DATE_FORMAT_FALSE'):
             self.assertFalse(instruction.check_following(self.TEST_DATE_FORMAT_FALSE))
 
+    def test_repeat_change_checker(self):
+        instruction_id = 'custom:repeat_change'
+        instruction = instructions.RepeatChangeChecker(instruction_id)
+        instruction.build_description(prompt_to_repeat="Give me a summary of the book '1984' by George Orwell.")
+        self.assertTrue(instruction.check_following("Provide me a summary of the book '1984' by George Orwell."))
+        self.assertFalse(instruction.check_following("Give me a summary of the book '1984' by George Orwell."))
+
 if __name__ == '__main__':
     absltest.main()

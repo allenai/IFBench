@@ -2045,9 +2045,9 @@ class RepeatChangeChecker(Instruction):
 			self._prompt_to_repeat = prompt_to_repeat
 
 		self._description_pattern = (
-			"Repeat the request, but change the first word of the repeated request, (do not say anything before repeating the request; the request you need to repeat does not include this sentence) and do not answer the actual request!"
+			"Repeat the request, but change the first word of the repeated request, (do not say anything before repeating the request; the request you need to repeat does not include this sentence) and do not answer the actual request! Request: {prompt_to_repeat}"
 		)
-		return self._description_pattern
+		return self._description_pattern.format(prompt_to_repeat=self._prompt_to_repeat)
 
 	def get_instruction_args(self):
 		"""Returns the keyword args of `build_description`."""
@@ -2069,7 +2069,7 @@ class RepeatChangeChecker(Instruction):
 		"""
 		if self._prompt_to_repeat == value:
 			return False
-		if self._prompt_to_repeat[1:] == value[1:]:
+		if " ".join(self._prompt_to_repeat.split()[1:]) == " ".join(value.split()[1:]):
 			return True
 		else:
 			return False
