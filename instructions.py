@@ -2051,11 +2051,11 @@ class RepeatChangeChecker(Instruction):
 
 	def get_instruction_args(self):
 		"""Returns the keyword args of `build_description`."""
-		return None
+		return {"prompt_to_repeat": self._prompt_to_repeat}
 
 	def get_instruction_args_keys(self):
 		"""Returns the args keys of `build_description`."""
-		return []
+		return ["prompt_to_repeat"]
 
 	def check_following(self, value):
 		"""Checks if the response contains the repeated request.
