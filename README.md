@@ -47,6 +47,7 @@ The new training constraints and verification functions are here: https://github
 | 12 | Qwen 3 8B | 33.7 | 86.3 |
 
 *Sorted by IFBench score (higher is better)*
+If you want your model added to the leaderboard, please create a pull request or email me!
 
 ## Licensing
 
