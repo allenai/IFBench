@@ -307,7 +307,7 @@ class ConjunctionCountChecker(Instruction):
 
 
 class PersonNameCountChecker(Instruction):
-	"""Mention at least {N} different person names in the response."""
+	"""Mention at least {N} different person names in the response, from this list of person names: Emma, Liam, Sophia..."""
 
 	def build_description(self, *, N=None):
 		"""Build the instruction description.
@@ -322,8 +322,6 @@ class PersonNameCountChecker(Instruction):
 
 		if self._num_person_names is None or self._num_person_names < 0:
 			self._num_person_names = random.randint(1, 50)
-
-		self.nlp = spacy.load("en_core_web_sm")
 
 		self._description_pattern = "Mention at least {N} different person names in the response, from this list of person names: Emma, Liam, Sophia, Jackson, Olivia, Noah, Ava, Lucas, Isabella, Mason, Mia, Ethan, Charlotte, Alexander, Amelia, Benjamin, Harper, Leo, Zoe, Daniel, Chloe, Samuel, Lily, Matthew, Grace, Owen, Abigail, Gabriel, Ella, Jacob, Scarlett, Nathan, Victoria, Elijah, Layla, Nicholas, Audrey, David, Hannah, Christopher, Penelope, Thomas, Nora, Andrew, Aria, Joseph, Claire, Ryan, Stella, Jonathan ."
 		return self._description_pattern.format(N=self._num_person_names)
@@ -866,6 +864,9 @@ class EmojiSentenceChecker(Instruction):
 		sentences = instructions_util.split_into_sentences(value)
 		for i, sentence in enumerate(sentences):
 			stripped = sentence.translate(str.maketrans('', '', string.punctuation)).strip()
+			#check for empty string
+			if not stripped:
+				return False
 			last_char = stripped[-1]
 			# because blank spaces are treated oddly
 			second_last_char = stripped[-2] if len(stripped) > 1 else stripped[-1]
@@ -2106,7 +2107,7 @@ class RepeatSimpleChecker(Instruction):
 
 
 class RepeatSpanChecker(Instruction):
-	"Copy the span of words that lies between (and including) index {n_start} and {n_end}, the indices are word indices, split by whitespace!"
+	"Copy the span of words that lies between (and including) index {n_start} and {n_end}, the indices are character indices!"
 
 	def build_description(self, prompt_to_repeat=None, n_start=None, n_end=None):
 		"""Build the instruction description.
