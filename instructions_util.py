@@ -18,9 +18,7 @@ import functools
 import random
 import re
 
-import immutabledict
 import nltk
-import ast
 
 WORD_LIST = [
     "western",
