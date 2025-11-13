@@ -20,7 +20,6 @@ import re
 import string
 from typing import Dict, Optional, Sequence, Union
 import nltk
-import spacy
 from spacy.cli import download
 import emoji
 import syllapy
@@ -481,6 +480,8 @@ class AlphabetLoopChecker(Instruction):
 		"""Checks if each word of the response starts with the next letter of the alphabet."""
 		value = value.translate(str.maketrans('', '', string.punctuation))
 		words = value.strip(''.join(string.punctuation) + ' ').split()
+		if not words:
+			return False
 		alphabet = string.ascii_lowercase
 		correct_letter = words[0][0].lower()
 		if correct_letter not in alphabet:  # numbers are fails
@@ -864,7 +865,7 @@ class EmojiSentenceChecker(Instruction):
 		sentences = instructions_util.split_into_sentences(value)
 		for i, sentence in enumerate(sentences):
 			stripped = sentence.translate(str.maketrans('', '', string.punctuation)).strip()
-			#check for empty string
+			# check for empty string
 			if not stripped:
 				return False
 			last_char = stripped[-1]
