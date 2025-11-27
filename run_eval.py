@@ -16,7 +16,6 @@
 """Binary of evaluating instruction following. See README.md."""
 
 import os
-from typing import Sequence
 
 from absl import app
 from absl import flags
