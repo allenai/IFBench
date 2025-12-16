@@ -61,8 +61,16 @@ def main(argv):
     accuracy = sum(follow_all_instructions) / len(outputs)
     logging.info("Accuracy: %f", accuracy)
 
+    input_basename = os.path.basename(_INPUT_RESPONSE_DATA.value)
+    if "-responses.jsonl" in input_basename:
+        model_name = input_basename.replace("-responses.jsonl", "")
+    else:
+         model_name = os.path.splitext(input_basename)[0]
+    
+    output_filename = f"{model_name}-{output_file_name}.jsonl"
+    
     output_file_name = os.path.join(
-        _OUTPUT_DIR.value, output_file_name + ".jsonl"
+        _OUTPUT_DIR.value, output_filename
     )
     evaluation_lib.write_outputs(output_file_name, outputs)
     logging.info("Generated: %s", output_file_name)
