@@ -1553,11 +1553,19 @@ def download_nltk_resources():
     try:
         nltk.data.find("tokenizers/punkt")
     except LookupError:
-        nltk.download("punkt")
+        nltk.download("punkt", quiet=True)
+    try:
+        nltk.data.find("tokenizers/punkt_tab")
+    except LookupError:
+        nltk.download("punkt_tab", quiet=True)
     try:
         nltk.data.find("corpora/stopwords")
     except LookupError:
-        nltk.download("stopwords")
+        nltk.download("stopwords", quiet=True)
+    try:
+        nltk.data.find("taggers/averaged_perceptron_tagger_eng")
+    except LookupError:
+        nltk.download("averaged_perceptron_tagger_eng", quiet=True)
 
 
 download_nltk_resources()
@@ -1590,7 +1598,7 @@ def _get_sentence_tokenizer():
 
 def count_stopwords(text):
     """Counts the number of stopwords."""
-    nltk.download('stopwords')
+    """Counts the number of stopwords."""
     stopwords = nltk.corpus.stopwords.words('english')
     tokenizer = nltk.tokenize.RegexpTokenizer(r"\w+")
     tokens = tokenizer.tokenize(text)
