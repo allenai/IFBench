@@ -1105,5 +1105,85 @@ Zimbabwe"""
         self.assertTrue(instruction.check_following("Provide me a summary of the book '1984' by George Orwell."))
         self.assertFalse(instruction.check_following("Give me a summary of the book '1984' by George Orwell."))
 
+    def test_sentence_alphabet__returns_false_when_sentence_is_empty_after_split(self):
+        """Test that SentenceAlphabetChecker returns False for sentences that are empty after splitting."""
+        instruction_id = 'custom:sentence_alphabet'
+        instruction = instructions.SentenceAlphabetChecker(instruction_id)
+        instruction.build_description()
+        empty_sentences = ". . . . . . . . . . . . . . . . . . . . . . . . . ."
+        self.assertFalse(instruction.check_following(empty_sentences))
+
+    def test_last_first__returns_false_when_sentence_has_no_words(self):
+        """Test that LastWordFirstNextChecker returns False for sentences with only punctuation."""
+        instruction_id = 'words:last_first'
+        instruction = instructions.LastWordFirstNextChecker(instruction_id)
+        instruction.build_description()
+        self.assertFalse(instruction.check_following("Hello world. ... Next sentence."))
+
+    def test_title_case__handles_single_character_words(self):
+        """Test that TitleCaseChecker correctly validates single character words like 'I' and 'A'."""
+        instruction_id = 'format:title_case'
+        instruction = instructions.TitleCaseChecker(instruction_id)
+        instruction.build_description()
+        self.assertTrue(instruction.check_following("I Am A Test"), "expected True for uppercase single-char words")
+        self.assertFalse(instruction.check_following("i Am A Test"), "expected False for lowercase single-char words")
+
+    def test_title_case__handles_punctuation_tokens(self):
+        """Test that TitleCaseChecker skips punctuation-only tokens without errors."""
+        instruction_id = 'format:title_case'
+        instruction = instructions.TitleCaseChecker(instruction_id)
+        instruction.build_description()
+        self.assertTrue(instruction.check_following("Hello, World!"))
+        self.assertTrue(instruction.check_following("Test (With Parentheses)"))
+
+    def test_title_case__handles_numeric_tokens(self):
+        """Test that TitleCaseChecker skips numeric tokens without errors."""
+        instruction_id = 'format:title_case'
+        instruction = instructions.TitleCaseChecker(instruction_id)
+        instruction.build_description()
+        self.assertTrue(instruction.check_following("Test 123 Numbers"))
+
+    def test_ngram_overlap__returns_false_when_response_too_short_for_ngrams(self):
+        """Test that NGramOverlapChecker returns False for responses too short to form trigrams."""
+        instruction_id = 'ratio:overlap'
+        instruction = instructions.NGramOverlapChecker(instruction_id)
+        instruction.build_description(reference_text="This is a reference text.", percentage=50)
+        self.assertFalse(instruction.check_following("Hi"), "expected False for 2-char response")
+        self.assertFalse(instruction.check_following(""), "expected False for empty response")
+
+    def test_quote_explanation__handles_empty_string_after_stripping(self):
+        """Test that QuoteExplanationChecker handles strings that become empty after stripping digits/punctuation."""
+        instruction_id = 'format:quote_unquote'
+        instruction = instructions.QuoteExplanationChecker(instruction_id)
+        instruction.build_description()
+        self.assertTrue(instruction.check_following("123..."), "expected True for digits and punctuation only")
+        self.assertTrue(instruction.check_following(""), "expected True for empty string")
+
+    def test_keyword_specific_position__case_insensitive_matching(self):
+        """Test that KeywordSpecificPositionChecker matches keywords regardless of case."""
+        instruction_id = 'words:keywords_specific_position'
+        instruction = instructions.KeywordSpecificPositionChecker(instruction_id)
+        instruction.build_description(keyword="test", n=1, m=1)
+        self.assertTrue(instruction.check_following("Test is here."), "expected True for capitalized keyword")
+        self.assertTrue(instruction.check_following("TEST is here."), "expected True for uppercase keyword")
+        self.assertTrue(instruction.check_following("test is here."), "expected True for lowercase keyword")
+
+    def test_words_position__case_insensitive_matching(self):
+        """Test that WordsPositionChecker matches keywords regardless of case."""
+        instruction_id = 'words:words_position'
+        instruction = instructions.WordsPositionChecker(instruction_id)
+        instruction.build_description(keyword="hello")
+        self.assertTrue(instruction.check_following("Start Hello middle Hello end"), "expected True for capitalized")
+        self.assertTrue(instruction.check_following("Start HELLO middle HELLO end"), "expected True for uppercase")
+        self.assertTrue(instruction.check_following("Start hello middle hello end"), "expected True for lowercase")
+
+    def test_stop_word_percentage__returns_false_when_response_empty(self):
+        """Test that StopWordPercentageChecker returns False for empty responses without division by zero."""
+        instruction_id = 'ratio:stop_words'
+        instruction = instructions.StopWordPercentageChecker(instruction_id)
+        instruction.build_description(percentage=50)
+        self.assertFalse(instruction.check_following(""), "expected False for empty response")
+        self.assertFalse(instruction.check_following("   "), "expected False for whitespace-only response")
+
 if __name__ == '__main__':
     absltest.main()

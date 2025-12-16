@@ -15,11 +15,20 @@
 """Library of instructions."""
 
 import logging
+import os
 import random
 import re
 import string
+from pathlib import Path
 from typing import Dict, Optional, Sequence, Union
+
+# Set NLTK data path to local directory before importing nltk
+_nltk_data_dir = Path(__file__).parent / ".nltk_data"
+_nltk_data_dir.mkdir(exist_ok=True)
+os.environ.setdefault("NLTK_DATA", str(_nltk_data_dir))
+
 import nltk
+nltk.data.path.insert(0, str(_nltk_data_dir))
 import emoji
 import syllapy
 import unicodedata
@@ -201,6 +210,8 @@ class StopWordPercentageChecker(Instruction):
 	def check_following(self, value):
 		"""Checks if the response contains the expected percentage of stop words."""
 		num_words = instructions_util.count_words(value)
+		if num_words == 0:
+			return False
 		num_stopwords = instructions_util.count_stopwords(value)
 		stopword_percentage = (num_stopwords / num_words) * 100
 		return stopword_percentage <= self._percentage
@@ -375,7 +386,9 @@ class PersonNameCountChecker(Instruction):
 		# Extract the named entities
 		person_names = []
 		for name in person_name_list:
-			if name in value:
+			# Use regex with word boundaries
+			pattern = r'\b{}\b'.format(re.escape(name))
+			if re.search(pattern, value):
 				person_names.append(name)
 		unique_person_names = set(person_names)
 
@@ -417,6 +430,8 @@ class NGramOverlapChecker(Instruction):
 		n = 3
 		ngrams = set(nltk.ngrams(value, n))
 		ref_ngrams = set(nltk.ngrams(self._reference_text, n))
+		if not ngrams:
+			return False
 		overlap = len(ngrams.intersection(ref_ngrams)) / len(ngrams)
 		return self._percentage - 2 <= overlap * 100 <= self._percentage + 2
 
@@ -1074,7 +1089,9 @@ class IncludeKeywordChecker(Instruction):
 		sentences = instructions_util.split_into_sentences(value)
 		if len(sentences) < self._keyword_position:
 			return False
-		return self._keyword.lower() in sentences[int(self._keyword_position - 1)].lower()
+		# Use regex with word boundaries for robust matching
+		pattern = r'\b{}\b'.format(re.escape(self._keyword))
+		return bool(re.search(pattern, sentences[int(self._keyword_position - 1)], re.IGNORECASE))
 
 
 class PronounCountChecker(Instruction):
@@ -1113,8 +1130,8 @@ class PronounCountChecker(Instruction):
 			 'itself', 'they', 'them', 'their', 'theirs', 'themselves'])
 		value = value.replace('/',
 							  ' ')  # to correctly count pronoun sets like she/her/hers, a common use case of pronouns
-		value = value.lower().translate(str.maketrans('', '', string.punctuation))
-		words = value.split()
+		# Use NLTK word_tokenize for better tokenization
+		words = nltk.word_tokenize(value.lower())
 		pronoun_count = sum(1 for word in words if word in pronouns)
 		return pronoun_count >= self._num_pronouns
 
@@ -1163,9 +1180,11 @@ class LastWordFirstNextChecker(Instruction):
 		"""Checks if the last word of each sentence in the response is the first word of the next sentence."""
 		sentences = instructions_util.split_into_sentences(value)
 		for i in range(len(sentences) - 1):
-			last_word = sentences[i].rstrip(''.join(string.punctuation) + ' ').split()[-1]
-			first_word = sentences[i + 1].lstrip(''.join(string.punctuation) + ' ').split()[0]
-			if last_word.lower() != first_word.lower():
+			last_words = sentences[i].rstrip(''.join(string.punctuation) + ' ').split()
+			first_words = sentences[i + 1].lstrip(''.join(string.punctuation) + ' ').split()
+			if not last_words or not first_words:
+				return False
+			if last_words[-1].lower() != first_words[0].lower():
 				return False
 		return True
 
@@ -1322,12 +1341,13 @@ class QuoteExplanationChecker(Instruction):
 	def check_following(self, value):
 		"""Checks if there are no quotes next to each other
 		and the passage does not end with a quote."""
-		value = value.replace('“', '"').replace('”', '"')
+		value = value.replace('"', '"').replace('"', '"')
 		value = value.replace("'\"'", '')  # remove references to the character '"'
 		value = ''.join(value.split())  # remove all whitespace
 		if '""' in value:
 			return False
-		if value.strip(string.digits + string.punctuation.replace('"', ''))[-1] == '"':
+		stripped = value.strip(string.digits + string.punctuation.replace('"', ''))
+		if stripped and stripped[-1] == '"':
 			return False
 		return True
 
@@ -1663,7 +1683,10 @@ class SentenceAlphabetChecker(Instruction):
 		if len(sentences) != 26:
 			return False
 		for i, sentence in enumerate(sentences):
-			if sentence.lstrip().split()[0].lower()[0] != chr(97 + i):
+			words = sentence.lstrip().split()
+			if not words or not words[0]:
+				return False
+			if words[0].lower()[0] != chr(97 + i):
 				return False
 		return True
 
@@ -1972,7 +1995,7 @@ class KeywordSpecificPositionChecker(Instruction):
 		words = instructions_util.nltk.word_tokenize(sentences[self._n - 1])
 		if len(words) < self._m:
 			return False
-		if words[self._m - 1] == self._keyword:
+		if words[self._m - 1].lower() == self._keyword.lower():
 			return True
 		else:
 			return False
@@ -2020,7 +2043,7 @@ class WordsPositionChecker(Instruction):
 		words = instructions_util.nltk.word_tokenize(value)
 		if len(words) < 2:
 			return False
-		if words[1] == words[-2] == self._keyword:
+		if words[1].lower() == words[-2].lower() == self._keyword.lower():
 			return True
 		else:
 			return False
@@ -2179,6 +2202,12 @@ class TitleCaseChecker(Instruction):
 		"""
 		words = instructions_util.nltk.word_tokenize(value)
 		for word in words:
+			if not word or not word[0].isalpha():
+				continue
+			if len(word) == 1:
+				if word[0].islower():
+					return False
+				continue
 			if word[0].isupper() and word[1:].islower():
 				continue
 			elif word[0].islower() and word[1:].isupper():
