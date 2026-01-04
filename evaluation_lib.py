@@ -90,7 +90,7 @@ def test_instruction_following_strict(
     if args and "prompt" in args:
       instruction.build_description(prompt=inp.prompt)
 
-    if response.strip() and instruction.check_following(response):
+    if response and response.strip() and instruction.check_following(response):
       is_following_list.append(True)
     else:
       is_following_list.append(False)
@@ -110,6 +110,15 @@ def test_instruction_following_loose(
 ):
   """Tests response for an upper bound for following instructions."""
   response = prompt_to_response[inp.prompt]
+  if response is None:
+      return OutputExample(
+          instruction_id_list=inp.instruction_id_list,
+          prompt=inp.prompt,
+          response="",
+          follow_all_instructions=False,
+          follow_instruction_list=[False] * len(inp.instruction_id_list),
+      )
+
   r = response.split("\n")
   response_remove_first = "\n".join(r[1:]).strip()
   response_remove_last = "\n".join(r[:-1]).strip()

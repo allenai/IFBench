@@ -1,6 +1,7 @@
 # Environment
 .env
 .venv/
+.nltk_data/
 
 # Python
 __pycache__/

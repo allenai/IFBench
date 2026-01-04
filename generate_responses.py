@@ -81,8 +81,7 @@ def main():
     )
     parser.add_argument(
         "--output-file",
-        default=settings.output_file,
-        help="Output file for responses",
+        help="Output file for responses (defaults to data/{model}-responses.jsonl)",
     )
     parser.add_argument(
         "--temperature",
@@ -127,9 +126,13 @@ def main():
     if not args.api_base:
         parser.error("--api-base is required (or set API_BASE in .env)")
 
-    # Load prompts
     prompts = load_prompts(args.input_file)
     print(f"Loaded {len(prompts)} prompts from {args.input_file}")
+
+    if not args.output_file:
+        safe_model_name = args.model.replace("/", "-")
+        args.output_file = f"data/{safe_model_name}-responses.jsonl"
+        
     print(f"Model: {args.model}")
     print(f"API: {args.api_base}")
 
