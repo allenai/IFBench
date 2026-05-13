@@ -8,6 +8,8 @@ helper for locating bundled data files.
 from importlib import resources
 from pathlib import Path
 
+from ifbench import classic_instructions, instructions, instructions_registry, instructions_util  # noqa: F401
+
 
 def data_path(name: str = "IFBench_test.jsonl") -> Path:
     """Return the filesystem path to a bundled data file."""
