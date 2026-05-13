@@ -12,11 +12,51 @@ IFBench consists of two parts:
 
 - New IF-RLVR training constraints: 29 new and challenging constraints, with corresponding verification functions. 
 
-## How to run the evaluation
-Install the requirements via the requirements.txt file.
-You need two jsonl files, one the IFBench_test.jsonl file (in the data folder) and one your file with eval prompts and completions (see sample_output.jsonl as an example). Then run:
+## Installation
+
+IFBench is pip-installable. The package ships all OOD verifiers as well as the
+classic Google IFEval verifiers, so it can serve as a single source of truth
+for both registries.
+
+```bash
+pip install ifbench
+# or
+uv add ifbench
 ```
-python3 -m run_eval --input_data=IFBench_test.jsonl --input_response_data=sample_output.jsonl --output_dir=eval
+
+To work on IFBench itself, clone and sync with [uv](https://docs.astral.sh/uv/):
+
+```bash
+git clone https://github.com/allenai/IFBench.git
+cd IFBench
+uv sync
+```
+
+The package is namespaced under `ifbench` — submodules are `ifbench.instructions`,
+`ifbench.classic_instructions`, `ifbench.instructions_registry`, and
+`ifbench.instructions_util`. The test jsonl is bundled inside the wheel; access
+it via `ifbench.data_path()`.
+
+### Programmatic use
+
+```python
+from ifbench import instructions_registry
+
+checker_cls = instructions_registry.INSTRUCTION_DICT["keywords:existence"]
+checker = checker_cls("keywords:existence")
+checker.build_description(keywords=["cat", "dog"])
+checker.check_following("I saw a cat and a dog today.")  # True
+```
+
+`INSTRUCTION_DICT` contains 83 verifiers in total: 25 classic IFEval keys
+(prefixed `keywords:`, `language:`, `length_constraints:`,
+`detectable_content:`, `detectable_format:`, `combination:`, `startend:`,
+`change_case:`, `punctuation:`) plus 58 IFBench OOD keys.
+
+## How to run the evaluation
+You need two jsonl files, one the IFBench_test.jsonl file (in the data folder) and one your file with eval prompts and completions (see sample_output.jsonl as an example). Then run:
+```bash
+uv run python -m run_eval --input_data=IFBench_test.jsonl --input_response_data=sample_output.jsonl --output_dir=eval
 ```
 
 Note: In the paper we generally report the prompt-level loose accuracy of IFBench. When we generate for evaluation, we use a temperature of 0 and adjust the maximum generated tokens depending on the model type, i.e. for thinking models we allow to generate more tokens and we then process the output to extract the answer without the reasoning chains.

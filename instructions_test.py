@@ -17,7 +17,7 @@
 
 from absl.testing import absltest
 from absl.testing import parameterized
-import instructions
+from ifbench import classic_instructions, instructions
 
 # pylint:disable=g-complex-comprehension
 class InstructionsTest(parameterized.TestCase):
@@ -1184,6 +1184,56 @@ Zimbabwe"""
         instruction.build_description(percentage=50)
         self.assertFalse(instruction.check_following(""), "expected False for empty response")
         self.assertFalse(instruction.check_following("   "), "expected False for whitespace-only response")
+
+class ClassicInstructionsTest(parameterized.TestCase):
+    """Smoke tests covering one classic Google IFEval verifier per family."""
+
+    def test_keyword_checker(self):
+        instruction = classic_instructions.KeywordChecker('keywords:existence')
+        instruction.build_description(keywords=['cat', 'dog'])
+        self.assertTrue(instruction.check_following('I have a cat and a dog.'))
+        self.assertFalse(instruction.check_following('I have a cat.'))
+
+    def test_number_of_words(self):
+        instruction = classic_instructions.NumberOfWords(
+            'length_constraints:number_words')
+        instruction.build_description(num_words=5, relation='at least')
+        self.assertTrue(
+            instruction.check_following('one two three four five six'))
+        self.assertFalse(instruction.check_following('only two'))
+
+    def test_json_format(self):
+        instruction = classic_instructions.JsonFormat(
+            'detectable_format:json_format')
+        instruction.build_description()
+        self.assertTrue(instruction.check_following('{"a": 1}'))
+        self.assertTrue(instruction.check_following('```json\n{"a": 1}\n```'))
+        self.assertFalse(instruction.check_following('not json at all'))
+
+    def test_capital_letters_english(self):
+        instruction = classic_instructions.CapitalLettersEnglishChecker(
+            'change_case:english_capital')
+        instruction.build_description()
+        self.assertTrue(instruction.check_following(
+            'HELLO THIS IS AN ENGLISH SENTENCE'))
+        self.assertFalse(instruction.check_following(
+            'hello this is an english sentence'))
+
+    def test_two_responses(self):
+        instruction = classic_instructions.TwoResponsesChecker(
+            'combination:two_responses')
+        instruction.build_description()
+        self.assertTrue(
+            instruction.check_following('first response\n******\nsecond response'))
+        self.assertFalse(instruction.check_following('only one response'))
+
+    def test_response_language(self):
+        instruction = classic_instructions.ResponseLanguageChecker(
+            'language:response_language')
+        instruction.build_description(language='en')
+        self.assertTrue(instruction.check_following(
+            'This is a sentence written entirely in the English language.'))
+
 
 if __name__ == '__main__':
     absltest.main()

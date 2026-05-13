@@ -1,10 +1,33 @@
 [project]
 name = "ifbench"
-version = "0.1.0"
+version = "0.2.0"
 description = "IFBench: A benchmark for precise instruction following evaluation"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
+authors = [
+    { name = "Allen Institute for AI" },
+]
+keywords = [
+    "nlp",
+    "evaluation",
+    "instruction-following",
+    "benchmark",
+    "ifeval",
+    "ifbench",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "absl-py",
     "langdetect",
@@ -20,6 +43,12 @@ dependencies = [
     "pydantic-settings",
 ]
 
+[project.urls]
+Homepage = "https://github.com/allenai/IFBench"
+Repository = "https://github.com/allenai/IFBench"
+Issues = "https://github.com/allenai/IFBench/issues"
+Paper = "https://arxiv.org/pdf/2507.02833"
+
 [project.optional-dependencies]
 dev = [
     "pytest",
@@ -30,7 +59,18 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = ["ifbench"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"ifbench/data/IFBench_test.jsonl" = "ifbench/data/IFBench_test.jsonl"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "ifbench/",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
 
 [dependency-groups]
 dev = [
