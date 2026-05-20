@@ -40,6 +40,17 @@ class OutputExample:
   follow_instruction_list: list[bool]
 
 
+def empty_output(inp):
+  """Builds a failed output for prompts with no generated response."""
+  return OutputExample(
+      instruction_id_list=inp.instruction_id_list,
+      prompt=inp.prompt,
+      response="",
+      follow_all_instructions=False,
+      follow_instruction_list=[False] * len(inp.instruction_id_list),
+  )
+
+
 def read_prompt_list(input_jsonl_filename):
   """Read inputs from jsonl."""
   inputs = []
@@ -77,7 +88,10 @@ def test_instruction_following_strict(
     prompt_to_response,
 ):
   """Tests response to see if instrutions are followed."""
-  response = prompt_to_response[inp.prompt]
+  response = get_response_for_prompt(inp, prompt_to_response)
+  if response is None:
+    return empty_output(inp)
+
   instruction_list = inp.instruction_id_list
   is_following_list = []
 
@@ -109,15 +123,9 @@ def test_instruction_following_loose(
     prompt_to_response,
 ):
   """Tests response for an upper bound for following instructions."""
-  response = prompt_to_response[inp.prompt]
+  response = get_response_for_prompt(inp, prompt_to_response)
   if response is None:
-      return OutputExample(
-          instruction_id_list=inp.instruction_id_list,
-          prompt=inp.prompt,
-          response="",
-          follow_all_instructions=False,
-          follow_instruction_list=[False] * len(inp.instruction_id_list),
-      )
+    return empty_output(inp)
 
   r = response.split("\n")
   response_remove_first = "\n".join(r[1:]).strip()
@@ -173,7 +181,17 @@ def read_prompt_to_response_dict(input_jsonl_filename):
     for l in f:
       example = json.loads(l)
       return_dict[example["prompt"]] = example["response"]
+      stripped_prompt = example["prompt"].strip()
+      if stripped_prompt != example["prompt"]:
+        return_dict[stripped_prompt] = example["response"]
   return return_dict
+
+
+def get_response_for_prompt(inp, prompt_to_response):
+  """Returns a prompt response, tolerating harmless leading/trailing spaces."""
+  if inp.prompt in prompt_to_response:
+    return prompt_to_response[inp.prompt]
+  return prompt_to_response.get(inp.prompt.strip())
 
 
 def print_report(outputs):
