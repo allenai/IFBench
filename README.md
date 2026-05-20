@@ -29,6 +29,25 @@ We also release our IF-RLVR code, as part of [open-instruct](https://github.com/
 
 The new training constraints and verification functions are here: https://github.com/allenai/open-instruct/tree/main/open_instruct/IFEvalG
 
+You can also use the IFBench verifiers directly as a reward function in
+training or local smoke tests:
+
+```python
+import evaluation_lib
+import reward_lib
+
+examples = evaluation_lib.read_prompt_list("data/IFBench_test.jsonl")
+reward_fn = reward_lib.make_reward_fn(examples, mode="loose")
+
+rewards = reward_fn(
+    [examples[0].prompt],
+    ["A model response that attempts to satisfy the prompt constraints."],
+)
+```
+
+For debugging reward shaping, `reward_lib.score_response(...)` returns both the
+binary prompt-level reward and the fractional instruction-level reward.
+
 ## 📊 Model Performance Leaderboard
 
 | Rank | Model | IFBench Score | IFEval Score |
