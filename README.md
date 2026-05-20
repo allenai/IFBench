@@ -48,6 +48,17 @@ rewards = reward_fn(
 For debugging reward shaping, `reward_lib.score_response(...)` returns both the
 binary prompt-level reward and the fractional instruction-level reward.
 
+To run a reproducible local reward smoke test against prompt/response jsonl
+files, use:
+
+```
+python3 -m run_reward \
+  --input_data=data/IFBench_test.jsonl \
+  --input_response_data=data/sample_output.jsonl \
+  --mode=loose \
+  --limit=5
+```
+
 ## 📊 Model Performance Leaderboard
 
 | Rank | Model | IFBench Score | IFEval Score |

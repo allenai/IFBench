@@ -81,6 +81,25 @@ class RewardLibTest(absltest.TestCase):
     with self.assertRaisesRegex(ValueError, "same length"):
       reward_fn(["Write one sentence."], [])
 
+  def test_summarize_results_reports_means(self):
+    results = [
+        reward_lib.score_response(self._example(), "A giraffe walks carefully."),
+        reward_lib.score_response(self._example(), "A cat walks carefully."),
+    ]
+
+    summary = reward_lib.summarize_results(results)
+
+    self.assertEqual(summary["example_count"], 2)
+    self.assertEqual(summary["prompt_reward_mean"], 0.5)
+    self.assertEqual(summary["instruction_reward_mean"], 0.5)
+
+  def test_summarize_results_handles_empty_input(self):
+    summary = reward_lib.summarize_results([])
+
+    self.assertEqual(summary["example_count"], 0)
+    self.assertEqual(summary["prompt_reward_mean"], 0.0)
+    self.assertEqual(summary["instruction_reward_mean"], 0.0)
+
 
 if __name__ == "__main__":
   absltest.main()

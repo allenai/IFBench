@@ -149,3 +149,20 @@ def score_response_batch(
       raise KeyError(f"prompt not found in IFBench inputs: {prompt!r}")
     results.append(score_response(prompt_index[prompt], response, mode))
   return results
+
+
+def summarize_results(results: Sequence[RewardResult]) -> dict[str, float]:
+  """Summarizes prompt-level and instruction-level rewards."""
+  if not results:
+    return {
+        "example_count": 0,
+        "prompt_reward_mean": 0.0,
+        "instruction_reward_mean": 0.0,
+    }
+
+  return {
+      "example_count": len(results),
+      "prompt_reward_mean": sum(r.prompt_reward for r in results) / len(results),
+      "instruction_reward_mean": sum(r.instruction_reward for r in results)
+      / len(results),
+  }
