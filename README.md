@@ -29,6 +29,35 @@ We also release our IF-RLVR code, as part of [open-instruct](https://github.com/
 
 The new training constraints and verification functions are here: https://github.com/allenai/open-instruct/tree/main/open_instruct/IFEvalG
 
+### Reward records for RLVR loops
+
+For lightweight RLVR integrations, `rlvr_env.py` exposes a per-completion reward
+API around the existing IFBench verifiers:
+
+```python
+from evaluation_lib import read_prompt_list
+from rlvr_env import score_response
+
+example = read_prompt_list("data/IFBench_test.jsonl")[0]
+result = score_response(example, "model completion", reward_mode="fraction")
+print(result.reward, result.follow_instruction_list)
+```
+
+You can also convert a prompt file and response file into reward-labeled JSONL:
+
+```bash
+python -m rlvr_env \
+  --input_data data/IFBench_test.jsonl \
+  --input_response_data data/sample_output.jsonl \
+  --output_path eval/sample_rewards.jsonl \
+  --evaluation_mode loose \
+  --reward_mode fraction
+```
+
+Each output row contains the prompt, response, scalar reward, per-instruction
+verifier decisions, and instruction IDs. `--reward_mode all` gives a binary
+prompt-level reward; `--reward_mode fraction` gives dense partial credit.
+
 ## 📊 Model Performance Leaderboard
 
 | Rank | Model | IFBench Score | IFEval Score |

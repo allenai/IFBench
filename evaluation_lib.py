@@ -43,7 +43,7 @@ class OutputExample:
 def read_prompt_list(input_jsonl_filename):
   """Read inputs from jsonl."""
   inputs = []
-  with open(input_jsonl_filename, "r") as f:
+  with open(input_jsonl_filename, "r", encoding="utf-8") as f:
     for l in f:
       example = json.loads(l)
       inputs.append(
@@ -57,7 +57,7 @@ def read_prompt_list(input_jsonl_filename):
 def write_outputs(output_jsonl_filename, outputs):
   """Writes outputs to jsonl."""
   assert outputs
-  with open(output_jsonl_filename, "w") as f:
+  with open(output_jsonl_filename, "w", encoding="utf-8") as f:
     for o in outputs:
       f.write(
           json.dumps(
@@ -169,7 +169,7 @@ def test_instruction_following_loose(
 def read_prompt_to_response_dict(input_jsonl_filename):
   """Creates dictionary matching prompt and response."""
   return_dict = {}
-  with open(input_jsonl_filename, "r") as f:
+  with open(input_jsonl_filename, "r", encoding="utf-8") as f:
     for l in f:
       example = json.loads(l)
       return_dict[example["prompt"]] = example["response"]
