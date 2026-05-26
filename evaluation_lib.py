@@ -17,6 +17,7 @@
 
 import collections
 import dataclasses
+import copy
 import json
 from typing import Dict, Optional, Union
 
@@ -38,6 +39,22 @@ class OutputExample:
   response: str
   follow_all_instructions: bool
   follow_instruction_list: list[bool]
+
+
+def _lookup_response(prompt_to_response, prompt):
+  """Fetches a response, tolerating harmless prompt whitespace drift."""
+  if prompt in prompt_to_response:
+    return prompt_to_response[prompt]
+
+  stripped_prompt = prompt.strip()
+  if stripped_prompt in prompt_to_response:
+    return prompt_to_response[stripped_prompt]
+
+  return None
+
+
+def _drop_none_values(kwargs):
+  return {key: value for key, value in kwargs.items() if value is not None}
 
 
 def read_prompt_list(input_jsonl_filename):
@@ -77,15 +94,15 @@ def test_instruction_following_strict(
     prompt_to_response,
 ):
   """Tests response to see if instrutions are followed."""
-  response = prompt_to_response[inp.prompt]
+  response = _lookup_response(prompt_to_response, inp.prompt) or ""
   instruction_list = inp.instruction_id_list
   is_following_list = []
 
   for index, instruction_id in enumerate(instruction_list):
     instruction_cls = instructions_registry.INSTRUCTION_DICT[instruction_id]
     instruction = instruction_cls(instruction_id)
-    inp.kwargs[index] = {key: value for key, value in inp.kwargs[index].items() if value is not None}
-    instruction.build_description(**inp.kwargs[index])
+    instruction_kwargs = _drop_none_values(inp.kwargs[index])
+    instruction.build_description(**instruction_kwargs)
     args = instruction.get_instruction_args()
     if args and "prompt" in args:
       instruction.build_description(prompt=inp.prompt)
@@ -109,7 +126,7 @@ def test_instruction_following_loose(
     prompt_to_response,
 ):
   """Tests response for an upper bound for following instructions."""
-  response = prompt_to_response[inp.prompt]
+  response = _lookup_response(prompt_to_response, inp.prompt)
   if response is None:
       return OutputExample(
           instruction_id_list=inp.instruction_id_list,
@@ -144,7 +161,7 @@ def test_instruction_following_loose(
     instruction_cls = instructions_registry.INSTRUCTION_DICT[instruction_id]
     instruction = instruction_cls(instruction_id)
 
-    instruction.build_description(**inp.kwargs[index])
+    instruction.build_description(**_drop_none_values(inp.kwargs[index]))
     args = instruction.get_instruction_args()
     if args and "prompt" in args:
       instruction.build_description(prompt=inp.prompt)
@@ -166,13 +183,26 @@ def test_instruction_following_loose(
   )
 
 
+def evaluate_response(inp, response, loose=False):
+  """Evaluates one response without requiring a prompt-response jsonl mapping."""
+  prompt_to_response = {inp.prompt: response}
+  inp_copy = copy.deepcopy(inp)
+
+  if loose:
+    return test_instruction_following_loose(inp_copy, prompt_to_response)
+
+  return test_instruction_following_strict(inp_copy, prompt_to_response)
+
+
 def read_prompt_to_response_dict(input_jsonl_filename):
   """Creates dictionary matching prompt and response."""
   return_dict = {}
   with open(input_jsonl_filename, "r") as f:
     for l in f:
       example = json.loads(l)
-      return_dict[example["prompt"]] = example["response"]
+      prompt = example["prompt"]
+      return_dict[prompt] = example["response"]
+      return_dict.setdefault(prompt.strip(), example["response"])
   return return_dict
 
 
