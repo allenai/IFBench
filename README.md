@@ -29,6 +29,42 @@ We also release our IF-RLVR code, as part of [open-instruct](https://github.com/
 
 The new training constraints and verification functions are here: https://github.com/allenai/open-instruct/tree/main/open_instruct/IFEvalG
 
+## RLVR task export and rewards
+
+This repo also includes a lightweight adapter for using IFBench prompts and
+verifiers as train-ready RLVR tasks.
+
+Export IFBench rows as chat-message JSONL tasks:
+
+```
+python3 -m rlvr_adapter export \
+  --input-data data/IFBench_test.jsonl \
+  --output-data data/ifbench_rlvr_tasks.jsonl
+```
+
+Score model responses with scalar rewards:
+
+```
+python3 -m rlvr_adapter score \
+  --input-data data/IFBench_test.jsonl \
+  --response-data data/sample_output.jsonl \
+  --output-data eval/ifbench_rewards.jsonl \
+  --reward-mode all
+```
+
+For Prime Intellect Verifiers or prime-rl, install the optional dependencies
+and load the environment from `ifbench_verifiers.py`:
+
+```
+uv sync --extra rlvr
+python3 - <<'PY'
+from ifbench_verifiers import IFBenchEnvConfig, load_environment
+
+env = load_environment(IFBenchEnvConfig())
+print(len(env.taskset.get_dataset()))
+PY
+```
+
 ## 📊 Model Performance Leaderboard
 
 | Rank | Model | IFBench Score | IFEval Score |

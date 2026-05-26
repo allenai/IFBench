@@ -24,6 +24,10 @@ dependencies = [
 dev = [
     "pytest",
 ]
+rlvr = [
+    "datasets",
+    "verifiers>=0.1.14",
+]
 
 [build-system]
 requires = ["hatchling"]
