@@ -4,11 +4,11 @@ version = "0.1.0"
 description = "Prime Verifiers environment for IFBench instruction-following RLVR."
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "datasets",
     "ifbench @ git+https://github.com/allenai/IFBench.git",
-    "open-instruct @ git+https://github.com/allenai/open-instruct.git",
+    "open-instruct @ git+https://github.com/allenai/open-instruct.git@38fb335",
     "verifiers>=0.1.14",
 ]
 

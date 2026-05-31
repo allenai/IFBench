@@ -21,6 +21,7 @@ declared as an environment dependency.
 From this directory:
 
 ```bash
+uv python pin 3.12
 prime eval run . -m openai/gpt-5-nano -n 20 -r 1
 ```
 
