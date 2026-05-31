@@ -25,10 +25,11 @@ uv python pin 3.12
 prime eval run . -m openai/gpt-5-nano -n 20 -r 1
 ```
 
-Use a small local smoke test with the packaged IFBench sample data:
+From the repository root, use the focused smoke tests with the packaged IFBench
+sample data:
 
 ```bash
-python -m pytest tests/test_ifbench_rlvr.py
+PYTHONDONTWRITEBYTECODE=1 uv run pytest tests/test_ifbench_rlvr.py
 ```
 
 ## Environment Arguments
