@@ -1,0 +1,27 @@
+[project]
+name = "ifbench-rlvr"
+version = "0.1.0"
+description = "Prime Verifiers environment for IFBench instruction-following RLVR."
+license = "Apache-2.0"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "datasets",
+    "ifbench @ git+https://github.com/allenai/IFBench.git",
+    "open-instruct @ git+https://github.com/allenai/open-instruct.git",
+    "verifiers>=0.1.14",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = ["ifbench_rlvr.py", "pyproject.toml", "README.md"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.verifiers.eval]
+num_examples = 20
+rollouts_per_example = 1
