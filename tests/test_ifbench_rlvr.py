@@ -116,6 +116,36 @@ def test_instruction_reward_scores_fractional_constraints():
     ) == 1.0
 
 
+def test_reward_helpers_ignore_verifiers_parser_kwarg():
+    row = ifbench_rlvr.normalise_example(
+        {
+            "key": "case-parser-kwarg",
+            "prompt": "Include exactly two numbers.",
+            "instruction_id_list": ["count:numbers"],
+            "kwargs": [{"N": 2}],
+        }
+    )
+
+    assert (
+        ifbench_rlvr.instruction_following_reward(
+            "The numbers are 1 and 2.",
+            row["answer"],
+            DummyParser(),
+            parser=DummyParser(),
+        )
+        == 1.0
+    )
+    assert (
+        ifbench_rlvr.all_constraints_reward(
+            "The numbers are 1 and 2.",
+            row["answer"],
+            DummyParser(),
+            parser=DummyParser(),
+        )
+        == 1.0
+    )
+
+
 def test_read_jsonl_builds_verifiers_rows(tmp_path):
     input_path = tmp_path / "ifbench.jsonl"
     input_path.write_text(

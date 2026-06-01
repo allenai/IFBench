@@ -125,9 +125,9 @@ def _candidate_responses(response: str, strict: bool) -> list[str]:
 
 
 def instruction_following_reward(
-    completion, answer: str, parser: vf.Parser, strict: bool = True, **kwargs
+    completion, answer: str, response_parser: vf.Parser, strict: bool = True, **kwargs
 ) -> float:
-    response = parser.parse_answer(completion) or ""
+    response = response_parser.parse_answer(completion) or ""
     payload = json.loads(answer)
     followed = []
 
@@ -152,8 +152,17 @@ def instruction_following_reward(
     return sum(followed) / len(followed)
 
 
-def all_constraints_reward(completion, answer: str, parser: vf.Parser, strict: bool = True, **kwargs) -> float:
-    return 1.0 if instruction_following_reward(completion, answer, parser, strict=strict) == 1.0 else 0.0
+def all_constraints_reward(
+    completion, answer: str, response_parser: vf.Parser, strict: bool = True, **kwargs
+) -> float:
+    return (
+        1.0
+        if instruction_following_reward(
+            completion, answer, response_parser, strict=strict
+        )
+        == 1.0
+        else 0.0
+    )
 
 
 def load_environment(
