@@ -42,9 +42,10 @@ The new training constraints and verification functions are here: https://github
 | 7 | OLMo2 Instruct + IF-RLVR | 44.7 | 74.5 |
 | 7 | Tulu3 DPO + IF-RLVR | 43.3 | 92.2 |
 | 9 | Claude 4 Sonnet | 42.3 | 91.3 |
-| 10 | DeepSeek R1 | 38.0 | 86.13 |
-| 11 | Qwen 3 32B | 37.3 | 85.6 |
-| 12 | Qwen 3 8B | 35.0 | 86.3 |
+| 10 | LFM 2.5 350M | 40.69 | - |
+| 11 | DeepSeek R1 | 38.0 | 86.13 |
+| 12 | Qwen 3 32B | 37.3 | 85.6 |
+| 13 | Qwen 3 8B | 35.0 | 86.3 |
 
 *Sorted by IFBench score (higher is better)*
 If you want your model added to the leaderboard, please create a pull request or email me!
