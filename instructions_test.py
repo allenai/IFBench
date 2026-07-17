@@ -1185,5 +1185,72 @@ Zimbabwe"""
         self.assertFalse(instruction.check_following(""), "expected False for empty response")
         self.assertFalse(instruction.check_following("   "), "expected False for whitespace-only response")
 
+    def test_repeat_span__uses_word_indices(self):
+        """Test that RepeatSpanChecker slices on whitespace word indices, not characters."""
+        instruction_id = 'repeat:repeat_span'
+        instruction = instructions.RepeatSpanChecker(instruction_id)
+        instruction.build_description(
+            prompt_to_repeat="The walls are solid but the stones are cracked and cold.",
+            n_start=0, n_end=7)
+        self.assertTrue(instruction.check_following("The walls are solid but the stones are"))
+        self.assertFalse(instruction.check_following("The walls are solid"))
+        self.assertFalse(instruction.check_following("The wall"))
+
+    def test_ngram_overlap__measures_word_trigrams(self):
+        """Test that NGramOverlapChecker measures word trigram overlap."""
+        instruction_id = 'ratio:overlap'
+        instruction = instructions.NGramOverlapChecker(instruction_id)
+        reference_text = "the quick brown fox jumps over the lazy dog again and again today"
+        instruction.build_description(reference_text=reference_text, percentage=100)
+        self.assertTrue(instruction.check_following(reference_text))
+        self.assertFalse(instruction.check_following("completely unrelated wording appears in this line"))
+
+    TEST_KEYWORDS_MULTIPLE_MESSAGE_1 = (
+        "The doorway led indoors past the doorstep to one door. "
+        + "bread " * 2 + "blue " * 3 + "lamp " * 5 + "river " * 7)
+    TEST_KEYWORDS_MULTIPLE_MESSAGE_2 = (
+        "door door " + "bread " * 2 + "blue " * 3 + "lamp " * 5 + "river " * 7)
+    def test_keywords_multiple__counts_whole_words(self):
+        """Test that KeywordsMultipleChecker counts whole words rather than substrings."""
+        instruction_id = 'count:keywords_multiple'
+        instruction = instructions.KeywordsMultipleChecker(instruction_id)
+        instruction.build_description(keyword1="door", keyword2="bread", keyword3="blue",
+                                      keyword4="lamp", keyword5="river")
+        with self.subTest('test with TEST_KEYWORDS_MULTIPLE_MESSAGE_1'):
+            self.assertTrue(instruction.check_following(self.TEST_KEYWORDS_MULTIPLE_MESSAGE_1))
+        with self.subTest('test with TEST_KEYWORDS_MULTIPLE_MESSAGE_2'):
+            self.assertFalse(instruction.check_following(self.TEST_KEYWORDS_MULTIPLE_MESSAGE_2))
+
+    def test_sentence_alphabet__ignores_leading_punctuation(self):
+        """Test that SentenceAlphabetChecker ignores a leading quote or markdown on the first word."""
+        instruction_id = 'custom:sentence_alphabet'
+        instruction = instructions.SentenceAlphabetChecker(instruction_id)
+        instruction.build_description()
+        words = ["Apple", "Bears", "Cats", "Dogs", "Eagles", "Foxes", "Goats", "Hawks", "Ibex",
+                 "Jays", "Kites", "Lions", "Moose", "Newts", "Owls", "Pigs", "Quail", "Rats",
+                 "Seals", "Toads", "Urial", "Voles", "Wolves", "Xerus", "Yaks", "Zebras"]
+        sentences = [f"{word} appear here now." for word in words]
+        self.assertTrue(instruction.check_following(" ".join(sentences)))
+        self.assertTrue(instruction.check_following('"' + sentences[0] + " " + " ".join(sentences[1:])))
+        self.assertFalse(instruction.check_following(" ".join([sentences[1], sentences[0]] + sentences[2:])))
+
+    def test_words_position__ignores_punctuation_tokens(self):
+        """Test that WordsPositionChecker computes positions on words, ignoring punctuation tokens."""
+        instruction_id = 'words:words_position'
+        instruction = instructions.WordsPositionChecker(instruction_id)
+        instruction.build_description(keyword="vibrant")
+        self.assertTrue(instruction.check_following("The vibrant sun set over a calm vibrant sea"))
+        self.assertTrue(instruction.check_following('"The vibrant sun set over a calm vibrant sea!"'))
+        self.assertFalse(instruction.check_following("The lazy sun set over a calm quiet sea"))
+
+    def test_sentence_words__requires_unique_words(self):
+        """Test that CharacterCountUniqueWordsChecker enforces the all-different-words requirement."""
+        instruction_id = 'ratio:sentence_words'
+        instruction = instructions.CharacterCountUniqueWordsChecker(instruction_id)
+        instruction.build_description()
+        self.assertFalse(instruction.check_following("The cat sat here. The cat sat here. The cat sat here."))
+        self.assertTrue(instruction.check_following("This is one. Now it's 22. On to three."))
+
+
 if __name__ == '__main__':
     absltest.main()
