@@ -4,5 +4,5 @@ nltk
 immutabledict
 spacy
 emoji
-syllapy
+syllapy @ git+https://github.com/rgbkrk/syllapy.git@eedd15c9817dd23ef3ac1f14718d8f6b46225bed
 unicodedata2

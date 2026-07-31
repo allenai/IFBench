@@ -11,9 +11,8 @@ dependencies = [
     "nltk",
     "immutabledict",
     "emoji",
-    "syllapy",
+    "syllapy @ git+https://github.com/rgbkrk/syllapy.git@eedd15c9817dd23ef3ac1f14718d8f6b46225bed",
     "unicodedata2",
-    "setuptools",
     "httpx",
     "tqdm",
     "pydantic>=2",
@@ -28,6 +27,9 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
