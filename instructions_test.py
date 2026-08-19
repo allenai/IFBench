@@ -15,6 +15,10 @@
 
 """Tests for instructions.py."""
 
+import json
+import os
+import tempfile
+
 from absl.testing import absltest
 from absl.testing import parameterized
 from ifbench import classic_instructions, instructions

@@ -47,6 +47,7 @@ def main(argv):
   inputs = evaluation_lib.read_prompt_list(_INPUT_DATA.value)
   prompt_to_response = evaluation_lib.read_prompt_to_response_dict(
       _INPUT_RESPONSE_DATA.value)
+  os.makedirs(_OUTPUT_DIR.value, exist_ok=True)
 
   # get instruction following results
   for func, output_file_name in [

@@ -69,26 +69,6 @@ We also release our IF-RLVR code, as part of [open-instruct](https://github.com/
 
 The new training constraints and verification functions are here: https://github.com/allenai/open-instruct/tree/main/open_instruct/IFEvalG
 
-## 📊 Model Performance Leaderboard
-
-| Rank | Model | IFBench Score | IFEval Score |
-|------|-------|---------------|--------------|
-| 🥇 1 | OpenAI o3 | **69.3** | 95.0 |
-| 🥈 2 | Qwen2.5 Base + IF-RLVR | **53.7** | 87.8 |
-| 🥉 3 |  Llama 3.1 Base + IF-RLVR | **52.7** | 88.2 |
-| 4 | Gemini 2.5 Pro | 52.3 | 65.4 |
-| 5 | Qwen 2.5 Instruct + IF-RLVR | 48.7 | 89.1 |
-| 6 | OLMo2 Base + IF-RLVR | 47.3 | 70.4 |
-| 7 | OLMo2 Instruct + IF-RLVR | 44.7 | 74.5 |
-| 7 | Tulu3 DPO + IF-RLVR | 43.3 | 92.2 |
-| 9 | Claude 4 Sonnet | 42.3 | 91.3 |
-| 10 | DeepSeek R1 | 38.0 | 86.13 |
-| 11 | Qwen 3 32B | 37.3 | 85.6 |
-| 12 | Qwen 3 8B | 35.0 | 86.3 |
-
-*Sorted by IFBench score (higher is better)*
-If you want your model added to the leaderboard, please create a pull request or email me!
-
 ## Licensing
 
 This codebase is licensed under Apache 2.0 as given in [LICENSE](./LICENSE).
