@@ -15,8 +15,13 @@
 
 """Tests for instructions.py."""
 
+import json
+import os
+import tempfile
+
 from absl.testing import absltest
 from absl.testing import parameterized
+import evaluation_lib
 import instructions
 
 # pylint:disable=g-complex-comprehension
@@ -1184,6 +1189,41 @@ Zimbabwe"""
         instruction.build_description(percentage=50)
         self.assertFalse(instruction.check_following(""), "expected False for empty response")
         self.assertFalse(instruction.check_following("   "), "expected False for whitespace-only response")
+
+    def test_evaluation_lookup__tolerates_trailing_prompt_space(self):
+        """Test eval lookup when response files have harmless prompt whitespace drift."""
+        inp = evaluation_lib.InputExample(
+            key=1,
+            instruction_id_list=["sentence:keyword"],
+            prompt="Say hello.",
+            kwargs=[{"word": "hello", "N": 1}],
+        )
+        with tempfile.NamedTemporaryFile("w", delete=False) as f:
+            f.write(json.dumps({"prompt": "Say hello. ", "response": "hello there."}))
+            f.write("\n")
+            response_file = f.name
+
+        try:
+            prompt_to_response = evaluation_lib.read_prompt_to_response_dict(response_file)
+        finally:
+            os.unlink(response_file)
+
+        output = evaluation_lib.test_instruction_following_strict(inp, prompt_to_response)
+        self.assertTrue(output.follow_all_instructions)
+
+    def test_evaluation_lookup__missing_response_fails_without_crashing(self):
+        """Test missing model responses are scored as failed instead of raising."""
+        inp = evaluation_lib.InputExample(
+            key=1,
+            instruction_id_list=["sentence:keyword"],
+            prompt="Say hello.",
+            kwargs=[{"word": "hello", "N": 1}],
+        )
+
+        output = evaluation_lib.test_instruction_following_strict(inp, {})
+        self.assertFalse(output.follow_all_instructions)
+        self.assertEqual(output.follow_instruction_list, [False])
+        self.assertEqual(output.response, "")
 
 if __name__ == '__main__':
     absltest.main()
