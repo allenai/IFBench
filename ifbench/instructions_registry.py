@@ -14,10 +14,48 @@
 
 """Registry of all instructions."""
 
-import instructions
+from ifbench import classic_instructions, instructions
+
+
+_KEYWORD = "keywords:"
+_LANGUAGE = "language:"
+_LENGTH = "length_constraints:"
+_CONTENT = "detectable_content:"
+_FORMAT = "detectable_format:"
+_COMBINATION = "combination:"
+_STARTEND = "startend:"
+_CHANGE_CASES = "change_case:"
+_PUNCTUATION = "punctuation:"
 
 
 INSTRUCTION_DICT = {
+    # --- Classic Google IFEval verifiers ---
+    _KEYWORD + "existence": classic_instructions.KeywordChecker,
+    _KEYWORD + "frequency": classic_instructions.KeywordFrequencyChecker,
+    _KEYWORD + "forbidden_words": classic_instructions.ForbiddenWords,
+    _KEYWORD + "letter_frequency": classic_instructions.LetterFrequencyChecker,
+    _LANGUAGE + "response_language": classic_instructions.ResponseLanguageChecker,
+    _LENGTH + "number_sentences": classic_instructions.NumberOfSentences,
+    _LENGTH + "number_paragraphs": classic_instructions.ParagraphChecker,
+    _LENGTH + "number_words": classic_instructions.NumberOfWords,
+    _LENGTH + "nth_paragraph_first_word": classic_instructions.ParagraphFirstWordCheck,
+    _CONTENT + "number_placeholders": classic_instructions.PlaceholderChecker,
+    _CONTENT + "postscript": classic_instructions.PostscriptChecker,
+    _FORMAT + "number_bullet_lists": classic_instructions.BulletListChecker,
+    _FORMAT + "constrained_response": classic_instructions.ConstrainedResponseChecker,
+    _FORMAT + "number_highlighted_sections": classic_instructions.HighlightSectionChecker,
+    _FORMAT + "multiple_sections": classic_instructions.SectionChecker,
+    _FORMAT + "json_format": classic_instructions.JsonFormat,
+    _FORMAT + "title": classic_instructions.TitleChecker,
+    _COMBINATION + "two_responses": classic_instructions.TwoResponsesChecker,
+    _COMBINATION + "repeat_prompt": classic_instructions.RepeatPromptThenAnswer,
+    _STARTEND + "end_checker": classic_instructions.EndChecker,
+    _CHANGE_CASES + "capital_word_frequency": classic_instructions.CapitalWordFrequencyChecker,
+    _CHANGE_CASES + "english_capital": classic_instructions.CapitalLettersEnglishChecker,
+    _CHANGE_CASES + "english_lowercase": classic_instructions.LowercaseLettersEnglishChecker,
+    _PUNCTUATION + "no_comma": classic_instructions.CommaChecker,
+    _STARTEND + "quotation": classic_instructions.QuotationChecker,
+    # --- IFBench OOD verifiers ---
     "count:word_count_range": instructions.WordCountRangeChecker,
     "count:unique_word_count" : instructions.UniqueWordCountChecker,
     "ratio:stop_words" : instructions.StopWordPercentageChecker,

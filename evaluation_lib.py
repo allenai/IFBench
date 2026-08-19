@@ -20,7 +20,7 @@ import dataclasses
 import json
 from typing import Dict, Optional, Union
 
-import instructions_registry
+from ifbench import instructions_registry
 
 
 @dataclasses.dataclass

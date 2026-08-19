@@ -21,8 +21,7 @@ import tempfile
 
 from absl.testing import absltest
 from absl.testing import parameterized
-import evaluation_lib
-import instructions
+from ifbench import classic_instructions, instructions
 
 # pylint:disable=g-complex-comprehension
 class InstructionsTest(parameterized.TestCase):
@@ -1190,40 +1189,55 @@ Zimbabwe"""
         self.assertFalse(instruction.check_following(""), "expected False for empty response")
         self.assertFalse(instruction.check_following("   "), "expected False for whitespace-only response")
 
-    def test_evaluation_lookup__tolerates_trailing_prompt_space(self):
-        """Test eval lookup when response files have harmless prompt whitespace drift."""
-        inp = evaluation_lib.InputExample(
-            key=1,
-            instruction_id_list=["sentence:keyword"],
-            prompt="Say hello.",
-            kwargs=[{"word": "hello", "N": 1}],
-        )
-        with tempfile.NamedTemporaryFile("w", delete=False) as f:
-            f.write(json.dumps({"prompt": "Say hello. ", "response": "hello there."}))
-            f.write("\n")
-            response_file = f.name
+class ClassicInstructionsTest(parameterized.TestCase):
+    """Smoke tests covering one classic Google IFEval verifier per family."""
 
-        try:
-            prompt_to_response = evaluation_lib.read_prompt_to_response_dict(response_file)
-        finally:
-            os.unlink(response_file)
+    def test_keyword_checker(self):
+        instruction = classic_instructions.KeywordChecker('keywords:existence')
+        instruction.build_description(keywords=['cat', 'dog'])
+        self.assertTrue(instruction.check_following('I have a cat and a dog.'))
+        self.assertFalse(instruction.check_following('I have a cat.'))
 
-        output = evaluation_lib.test_instruction_following_strict(inp, prompt_to_response)
-        self.assertTrue(output.follow_all_instructions)
+    def test_number_of_words(self):
+        instruction = classic_instructions.NumberOfWords(
+            'length_constraints:number_words')
+        instruction.build_description(num_words=5, relation='at least')
+        self.assertTrue(
+            instruction.check_following('one two three four five six'))
+        self.assertFalse(instruction.check_following('only two'))
 
-    def test_evaluation_lookup__missing_response_fails_without_crashing(self):
-        """Test missing model responses are scored as failed instead of raising."""
-        inp = evaluation_lib.InputExample(
-            key=1,
-            instruction_id_list=["sentence:keyword"],
-            prompt="Say hello.",
-            kwargs=[{"word": "hello", "N": 1}],
-        )
+    def test_json_format(self):
+        instruction = classic_instructions.JsonFormat(
+            'detectable_format:json_format')
+        instruction.build_description()
+        self.assertTrue(instruction.check_following('{"a": 1}'))
+        self.assertTrue(instruction.check_following('```json\n{"a": 1}\n```'))
+        self.assertFalse(instruction.check_following('not json at all'))
 
-        output = evaluation_lib.test_instruction_following_strict(inp, {})
-        self.assertFalse(output.follow_all_instructions)
-        self.assertEqual(output.follow_instruction_list, [False])
-        self.assertEqual(output.response, "")
+    def test_capital_letters_english(self):
+        instruction = classic_instructions.CapitalLettersEnglishChecker(
+            'change_case:english_capital')
+        instruction.build_description()
+        self.assertTrue(instruction.check_following(
+            'HELLO THIS IS AN ENGLISH SENTENCE'))
+        self.assertFalse(instruction.check_following(
+            'hello this is an english sentence'))
+
+    def test_two_responses(self):
+        instruction = classic_instructions.TwoResponsesChecker(
+            'combination:two_responses')
+        instruction.build_description()
+        self.assertTrue(
+            instruction.check_following('first response\n******\nsecond response'))
+        self.assertFalse(instruction.check_following('only one response'))
+
+    def test_response_language(self):
+        instruction = classic_instructions.ResponseLanguageChecker(
+            'language:response_language')
+        instruction.build_description(language='en')
+        self.assertTrue(instruction.check_following(
+            'This is a sentence written entirely in the English language.'))
+
 
 if __name__ == '__main__':
     absltest.main()

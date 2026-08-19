@@ -18,7 +18,41 @@ import functools
 import random
 import re
 
+import immutabledict
 import nltk
+
+LANGUAGE_CODES = immutabledict.immutabledict({
+    "en": "English",
+    "es": "Spanish",
+    "pt": "Portuguese",
+    "ar": "Arabic",
+    "hi": "Hindi",
+    "fr": "French",
+    "ru": "Russian",
+    "de": "German",
+    "ja": "Japanese",
+    "it": "Italian",
+    "bn": "Bengali",
+    "uk": "Ukrainian",
+    "th": "Thai",
+    "ur": "Urdu",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "bg": "Bulgarian",
+    "ko": "Korean",
+    "pl": "Polish",
+    "he": "Hebrew",
+    "fa": "Persian",
+    "vi": "Vietnamese",
+    "ne": "Nepali",
+    "sw": "Swahili",
+    "kn": "Kannada",
+    "mr": "Marathi",
+    "gu": "Gujarati",
+    "pa": "Punjabi",
+    "ml": "Malayalam",
+    "fi": "Finnish",
+})
 
 WORD_LIST = [
     "western",
@@ -1594,6 +1628,13 @@ def count_words(text):
 @functools.lru_cache(maxsize=None)
 def _get_sentence_tokenizer():
     return nltk.data.load("nltk:tokenizers/punkt/english.pickle")
+
+
+def count_sentences(text):
+    """Count the number of sentences."""
+    tokenizer = _get_sentence_tokenizer()
+    tokenized_sentences = tokenizer.tokenize(text)
+    return len(tokenized_sentences)
 
 
 def count_stopwords(text):

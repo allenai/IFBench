@@ -37,7 +37,7 @@ from collections import Counter
 import csv
 import io
 
-import instructions_util
+from ifbench import instructions_util
 
 
 def _word_tokens_without_punctuation(text):
