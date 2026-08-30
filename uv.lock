@@ -252,7 +252,6 @@ dependencies = [
     { name = "nltk" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
-    { name = "setuptools" },
     { name = "syllapy" },
     { name = "tqdm" },
     { name = "unicodedata2" },
@@ -280,8 +279,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2" },
     { name = "pydantic-settings" },
     { name = "pytest", marker = "extra == 'dev'" },
-    { name = "setuptools" },
-    { name = "syllapy" },
+    { name = "syllapy", git = "https://github.com/rgbkrk/syllapy.git?rev=eedd15c9817dd23ef3ac1f14718d8f6b46225bed" },
     { name = "tqdm" },
     { name = "unicodedata2" },
 ]
@@ -667,15 +665,6 @@ wheels = [
 ]
 
 [[package]]
-name = "setuptools"
-version = "80.9.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz", hash = "sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c", size = 1319958, upload-time = "2025-05-27T00:56:51.443Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl", hash = "sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922", size = 1201486, upload-time = "2025-05-27T00:56:49.664Z" },
-]
-
-[[package]]
 name = "six"
 version = "1.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -686,12 +675,8 @@ wheels = [
 
 [[package]]
 name = "syllapy"
-version = "0.7.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/29/a1/7bc1ce4852e14ab5f3153262639742ae63fbfa626507dac4ab919a1e5232/syllapy-0.7.2.tar.gz", hash = "sha256:e55a7ad97d8b232e174b83f91b8f9be0c355d2a8e1208c7f6229055189605564", size = 25561, upload-time = "2022-08-29T01:55:03.366Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0e/cc/ffc9bddc146f14e8792a9b05b2bd1bc5f23f3b752a06e96b244780ce55b9/syllapy-0.7.2-py3-none-any.whl", hash = "sha256:198a7413033c32d7b31e21962efb3f284bcea80d3346e954b938ca1ebe6bee20", size = 24882, upload-time = "2022-08-29T01:55:01.1Z" },
-]
+version = "0.8.0"
+source = { git = "https://github.com/rgbkrk/syllapy.git?rev=eedd15c9817dd23ef3ac1f14718d8f6b46225bed#eedd15c9817dd23ef3ac1f14718d8f6b46225bed" }
 
 [[package]]
 name = "tomli"
