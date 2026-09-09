@@ -35,7 +35,6 @@ dependencies = [
     "immutabledict",
     "emoji",
     "syllapy>=0.8.0",
-    "unicodedata2",
     "httpx",
     "tqdm",
     "pydantic>=2",
