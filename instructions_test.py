@@ -996,9 +996,10 @@ Zimbabwe"""
         with self.subTest('test with TEST_SENTENCE_ALPHABET_FALSE2'):
             self.assertFalse(instruction.check_following(self.TEST_SENTENCE_ALPHABET_FALSE2))
 
-    TEST_EUROPE = """Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana, Zagreb"""
-    TEST_EUROPE_WRONG_ORDER = """Zagreb, Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana"""
-    TEST_EUROPE_INCOMPLETE = """Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana"""
+    TEST_EUROPE = """Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Kyiv, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana, Zagreb"""
+    TEST_EUROPE_WRONG_ORDER = """Zagreb, Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Kyiv, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana"""
+    TEST_EUROPE_WITHOUT_KYIV = """Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana, Zagreb"""
+    TEST_EUROPE_INCOMPLETE = """Reykjavík, Helsinki, Oslo, Tallinn, Stockholm, Riga, Moscow, Copenhagen, Vilnius, Minsk, Dublin, Berlin, Amsterdam, Warsaw, London, Brussels, Kyiv, Prague, Luxembourg, Paris, Vienna, Bratislava, Budapest, Vaduz, Chișinău, Bern, Ljubljana"""
     def test_europe_capitals(self):
         instruction_id = 'custom:european_capitals_sort'
         instruction = instructions.EuropeanCapitalsSortChecker(instruction_id)
@@ -1009,6 +1010,8 @@ Zimbabwe"""
             self.assertFalse(instruction.check_following(self.TEST_EUROPE_WRONG_ORDER))
         with self.subTest('test with TEST_EUROPE_INCOMPLETE'):
             self.assertFalse(instruction.check_following(self.TEST_EUROPE_INCOMPLETE))
+        with self.subTest('test with TEST_EUROPE_WITHOUT_KYIV'):
+            self.assertFalse(instruction.check_following(self.TEST_EUROPE_WITHOUT_KYIV))
 
     TEST_CSV = """ID,Country,City,Year,Count
 1,USA,New York,2020,125
