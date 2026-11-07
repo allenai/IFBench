@@ -19,6 +19,7 @@ import json
 import os
 import tempfile
 
+import evaluation_lib
 from absl.testing import absltest
 from absl.testing import parameterized
 from ifbench import classic_instructions, instructions
@@ -543,6 +544,71 @@ class InstructionsTest(parameterized.TestCase):
             self.assertTrue(instruction.check_following(self.TEST_SPECIAL_BULLET_POINTS))
         with self.subTest('test with TEST_SPECIAL_BULLET_POINTS_FALSE'):
             self.assertFalse(instruction.check_following(self.TEST_SPECIAL_BULLET_POINTS_FALSE))
+
+    def _special_bullet_checker(self, marker):
+        checker = instructions.SpecialBulletPointsChecker('format:list')
+        checker.build_description(sep=marker)
+        return checker
+
+    @parameterized.product(
+        marker=['...', 'SEPARATOR', '!?!?', '-'],
+        newline=['\n', '\r\n'],
+    )
+    def test_special_bullet_line_starts(self, marker, newline):
+        value = f'{marker} First item{newline} \t{marker} Second item'
+        self.assertTrue(self._special_bullet_checker(marker).check_following(value))
+
+    @parameterized.product(
+        marker=['...', 'SEPARATOR', '!?!?', '-'],
+        value_template=[
+            'Some {marker} prose with {marker} inside it.',
+            '{marker} One item with {marker} in its text.',
+            '{marker} First item\nProse with {marker} inside it.',
+        ],
+    )
+    def test_special_bullet_in_line_occurrences(self, marker, value_template):
+        value = value_template.format(marker=marker)
+        self.assertFalse(self._special_bullet_checker(marker).check_following(value))
+
+    @parameterized.parameters(
+        ('-', 'Quantum entanglement is a well-known idea in state-of-the-art fiction.'),
+        ('-', 'The war lasted 1939 - 1945, and the peace 1950 - 1960.'),
+        ('-', 'It was fast -- really fast.'),
+        ('...', 'Well... maybe so... who knows.'),
+    )
+    def test_special_bullet_reported_prose(self, marker, value):
+        self.assertFalse(self._special_bullet_checker(marker).check_following(value))
+
+    @parameterized.parameters('...', 'SEPARATOR', '!?!?', '-')
+    def test_special_bullet_zero_or_one_marker(self, marker):
+        checker = self._special_bullet_checker(marker)
+        self.assertFalse(checker.check_following(''))
+        self.assertFalse(checker.check_following('Ordinary prose.'))
+        self.assertFalse(checker.check_following(f'{marker} Only one item.'))
+
+    @parameterized.product(
+        evaluate=[
+            evaluation_lib.test_instruction_following_strict,
+            evaluation_lib.test_instruction_following_loose,
+        ],
+        marker=['...', 'SEPARATOR', '!?!?', '-'],
+        is_list=[False, True],
+    )
+    def test_special_bullet_evaluation_paths(self, evaluate, marker, is_list):
+        example = evaluation_lib.InputExample(
+            key=0,
+            instruction_id_list=['format:list'],
+            prompt='Answer using a list.',
+            kwargs=[{'sep': marker}],
+        )
+        response = (
+            f'{marker} First item\n{marker} Second item'
+            if is_list
+            else f'Plain {marker} prose {marker} without a list.'
+        )
+        result = evaluate(example, {example.prompt: response})
+        self.assertEqual(result.follow_instruction_list, [is_list])
+        self.assertIs(result.follow_all_instructions, is_list)
 
     TEST_THESIS = """<i>\n  A thesis.\n</i>\nA paragraph"""
     TEST_THESIS_EM = """<em>"Animal Farm" and "A Streetcar Named Desire" both explore themes of power, class struggle, and the corrupting influence of authority, but they do so through distinct narrative styles and settings.</em>
