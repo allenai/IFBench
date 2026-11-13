@@ -1410,7 +1410,8 @@ class SpecialBulletPointsChecker(Instruction):
 
 	def check_following(self, value):
 		"""Checks if the response includes at least two instances of {sep} that start a new line."""
-		return len(re.findall(re.escape(self._bullet_marker), value)) >= 2
+		return sum(line.lstrip().startswith(self._bullet_marker)
+				   for line in value.splitlines()) >= 2
 
 
 class ItalicsThesisChecker(Instruction):
