@@ -533,6 +533,29 @@ class InstructionsTest(parameterized.TestCase):
         with self.subTest('test with TEST_QUOTE_EXPLANATION_FALSE'):
             self.assertFalse(instruction.check_following(self.TEST_QUOTE_EXPLANATION_FALSE))
 
+    def test_quote_unquote_quote_styles(self):
+        instruction = instructions.QuoteExplanationChecker('format:quote_unquote')
+        instruction.build_description()
+        for opening, closing in [('"', '"'), ('“', '”')]:
+            first = f'{opening}Hello{closing}'
+            second = f'{opening}World{closing}'
+            for response, expected in [
+                (first, False),
+                (f'{first}. \n', False),
+                (f'{first} A greeting.', True),
+                (f'{first}\n{second} A greeting.', False),
+                (f'{first} A greeting. {second} Our planet.', True),
+            ]:
+                with self.subTest(response=response):
+                    self.assertEqual(instruction.check_following(response), expected)
+        for response, expected in [
+            ('“Hello” "World" A greeting.', False),
+            ('"Hello" “World” A greeting.', False),
+            ('“Hello” A greeting. "World" Our planet.', True),
+        ]:
+            with self.subTest(response=response):
+                self.assertEqual(instruction.check_following(response), expected)
+
     TEST_SPECIAL_BULLET_POINTS = """Some explanation.\n ... A bullet point.\n ... Another bullet point."""
     TEST_SPECIAL_BULLET_POINTS_FALSE = """- Some explanation.\n - A bullet point.\n - Another bullet point"""
     def test_special_bullet_points(self):
@@ -1106,11 +1129,47 @@ Zimbabwe"""
             self.assertFalse(instruction.check_following(self.TEST_DATE_FORMAT_FALSE))
 
     def test_repeat_change_checker(self):
-        instruction_id = 'custom:repeat_change'
+        instruction_id = 'repeat:repeat_change'
         instruction = instructions.RepeatChangeChecker(instruction_id)
         instruction.build_description(prompt_to_repeat="Give me a summary of the book '1984' by George Orwell.")
         self.assertTrue(instruction.check_following("Provide me a summary of the book '1984' by George Orwell."))
         self.assertFalse(instruction.check_following("Give me a summary of the book '1984' by George Orwell."))
+
+    def test_repeat_change_checker_whitespace(self):
+        instruction = instructions.RepeatChangeChecker('repeat:repeat_change')
+        instruction.build_description(prompt_to_repeat="Write a poem about rain")
+        for response, expected in [
+            ("Write a poem about rain", False),
+            ("Write a poem about rain\n", False),
+            ("  Write a poem about rain  ", False),
+            ("Write  a\tpoem\nabout rain", False),
+            ("Write\u00a0a poem about rain", False),
+            ("Compose a poem about rain", True),
+            (" \tCompose  a\tpoem\nabout rain\n", True),
+            ("write a poem about rain", True),
+            ("Compose a story about rain", False),
+            ("Compose a poem about rain please", False),
+            ("Compose a poem about", False),
+            ("a poem about rain", False),
+            ("", False),
+            (" \t\n", False),
+        ]:
+            with self.subTest(response=response):
+                self.assertEqual(instruction.check_following(response), expected)
+
+    def test_repeat_change_checker_single_word(self):
+        instruction = instructions.RepeatChangeChecker('repeat:repeat_change')
+        instruction.build_description(prompt_to_repeat="Write")
+        for response, expected in [
+            ("Write", False),
+            (" Write\n", False),
+            ("Compose", True),
+            ("Compose more", False),
+            ("", False),
+            (" \t\n", False),
+        ]:
+            with self.subTest(response=response):
+                self.assertEqual(instruction.check_following(response), expected)
 
     def test_sentence_alphabet__returns_false_when_sentence_is_empty_after_split(self):
         """Test that SentenceAlphabetChecker returns False for sentences that are empty after splitting."""

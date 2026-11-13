@@ -1370,7 +1370,7 @@ class QuoteExplanationChecker(Instruction):
 	def check_following(self, value):
 		"""Checks if there are no quotes next to each other
 		and the passage does not end with a quote."""
-		value = value.replace('"', '"').replace('"', '"')
+		value = value.replace('“', '"').replace('”', '"')
 		value = value.replace("'\"'", '')  # remove references to the character '"'
 		value = ''.join(value.split())  # remove all whitespace
 		if '""' in value:
@@ -2109,21 +2109,23 @@ class RepeatChangeChecker(Instruction):
 		return ["prompt_to_repeat"]
 
 	def check_following(self, value):
-		"""Checks if the response contains the repeated request.
+		"""Checks if only the first word of the repeated request is changed.
 
 		Args:
 		  value: A string representing the response.
 
 		Returns:
-		  True if the repeated request is found in the response;
+		  True if the first word differs and all remaining words match;
 		  otherwise, False.
 		"""
-		if self._prompt_to_repeat == value:
+		prompt_words = self._prompt_to_repeat.split()
+		response_words = value.split()
+		if not prompt_words or not response_words:
 			return False
-		if " ".join(self._prompt_to_repeat.split()[1:]) == " ".join(value.split()[1:]):
-			return True
-		else:
-			return False
+		return (
+			prompt_words[0] != response_words[0]
+			and prompt_words[1:] == response_words[1:]
+		)
 
 
 class RepeatSimpleChecker(Instruction):
