@@ -1183,6 +1183,26 @@ Zimbabwe"""
         with self.subTest('test with TEST_MISSING_QUOTES'):
             self.assertFalse(instruction.check_following(self.TEST_MISSING_QUOTES))
 
+    def test_csv_quotes_empty_field(self):
+        """An empty field is not enclosed in double quotes, so the checker returns False."""
+        instruction = instructions.QuotesCSVChecker('custom:csv_quotes')
+        instruction.build_description()
+        table = (
+            '"StudentID"\t"Subject"\t"Grade"\t"Semester"\t"Score"\n'
+            '"1"\t"Math"\t"A"\t"Fall"\t"95"\n'
+            '{row}\n'
+            '"3"\t"Art"\t"C"\t"Fall"\t"75"'
+        )
+        for row, expected in [
+            ('"2"\t"Physics"\t"B"\t"Fall"\t"85"', True),
+            ('"2"\t\t"B"\t"Fall"\t"85"', False),
+            ('"2"\t \t"B"\t"Fall"\t"85"', False),
+            ('\t"Physics"\t"B"\t"Fall"\t"85"', False),
+            ('"2"\t"Physics"\t"B"\t"Fall"\t', False),
+        ]:
+            with self.subTest(row=row):
+                self.assertEqual(instruction.check_following(table.format(row=row)), expected)
+
     TEST_DATE_FORMAT = """1796-07-05, 1800-12-31"""
     TEST_DATE_FORMAT_FALSE = """07-05-1796"""
     def test_reverse_order(self):
