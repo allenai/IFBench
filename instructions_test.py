@@ -656,7 +656,45 @@ In "Animal Farm," Orwell uses the allegory of a farm taken over by animals to cr
         with self.subTest('test with TEST_SUBBULLET_FALSE'):
             self.assertFalse(instruction.check_following(self.TEST_SUBBULLET_FALSE))
 
-    TEST_SOME_BULLET_POINTS = """This is a sentence. This is another sentence. This is a third sentence.\n  * A bullet.\n  * Another bullet.\n  * A third bullet."""
+    TEST_SUBBULLET_BOLD = """* **Growth**\n  - Discomfort helps learning.\n* **Clarity**\n  - It sharpens decisions."""
+
+    @parameterized.parameters(
+        (TEST_SUBBULLET_BOLD, True),
+        ('**Summary**\n* A bullet.\n  - A sub-bullet.', True),
+        ('', False),
+        ('Memorization is when a model copies its training data.', False),
+        ('A well-known idea, stated plainly.', False),
+        ('* A bullet with a hyphen-ated word.\n* Another bullet.', False),
+        ('- A sub-bullet before any bullet.\n* A bullet.', False),
+    )
+    def test_subbullet_line_starts(self, value, expected):
+        instruction = instructions.SubBulletPointsChecker('format:sub-bullets')
+        instruction.build_description()
+        self.assertIs(instruction.check_following(value), expected)
+
+    @parameterized.product(
+        evaluate=[
+            evaluation_lib.test_instruction_following_strict,
+            evaluation_lib.test_instruction_following_loose,
+        ],
+        is_list=[False, True],
+    )
+    def test_subbullet_evaluation_paths(self, evaluate, is_list):
+        example = evaluation_lib.InputExample(
+            key=0,
+            instruction_id_list=['format:sub-bullets'],
+            prompt='Answer with bullets and sub-bullets.',
+            kwargs=[{}],
+        )
+        response = (
+            self.TEST_SUBBULLET_BOLD
+            if is_list
+            else 'Memorization is when a model copies its training data.'
+        )
+        result = evaluate(example, {example.prompt: response})
+        self.assertEqual(result.follow_instruction_list, [is_list])
+
+    TEST_SOME_BULLET_POINTS ="""This is a sentence. This is another sentence. This is a third sentence.\n  * A bullet.\n  * Another bullet.\n  * A third bullet."""
     TEST_SOME_BULLET_POINTS_FALSE_SENTENCE = """This is a sentence.\n  * A bullet.\n  * Another bullet.\n  * A third bullet.\n  * A fourth bullet."""
     TEST_SOME_BULLET_POINTS_FALSE_BULLET = """This is a sentence. This is another sentence.\n  * A bullet.\n"""
     def test_some_bullet_points(self):
