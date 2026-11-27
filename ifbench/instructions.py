@@ -1470,11 +1470,15 @@ class SubBulletPointsChecker(Instruction):
 	def check_following(self, value):
 		"""Checks that there is at least one * that starts a line and each * that starts a line
 		is followed by at least one line starting with -."""
-		bullets = value.split('*')
-		for bullet in bullets[1:]:
-			if "-" not in bullet:
-				return False
-		return True
+		has_sub_bullet = []
+		for line in value.splitlines():
+			line = line.strip()
+			# a line opening with "**" is bold text or a rule, not a bullet
+			if line.startswith('*') and not line.startswith('**'):
+				has_sub_bullet.append(False)
+			elif line.startswith('-') and has_sub_bullet:
+				has_sub_bullet[-1] = True
+		return bool(has_sub_bullet) and all(has_sub_bullet)
 
 
 class SomeBulletPointsChecker(Instruction):
